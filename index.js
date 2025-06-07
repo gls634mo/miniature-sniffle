@@ -73,10 +73,7 @@ client.once('ready', async () => {
 });
 
 // Подключение к MongoDB
-mongoose.connect('mongodb://localhost:27017/giveaway-bot', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
+mongoose.connect('mongodb://localhost:27017/giveaway-bot').then(() => {
     console.log('[БАЗА ДАННЫХ]'.green + ' Подключение к MongoDB успешно!');
 }).catch(err => {
     console.log('[БАЗА ДАННЫХ]'.red + ' Ошибка подключения к MongoDB:', err);
