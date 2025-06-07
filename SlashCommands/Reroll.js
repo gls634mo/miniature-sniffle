@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from "discord.js";
+import { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } from "discord.js";
 import GiveawaySchema from "../Models/GiveawaySchema.js";
 
 export const data = new SlashCommandBuilder()
@@ -99,30 +99,22 @@ export async function execute(interaction, client) {
     
     await message.edit({ embeds: [newEmbed], components: [] })
     
-    // Создание кнопки для повторного перевыбора
-    const rerollButton = new ButtonBuilder()
-        .setCustomId(`giveaway.reroll.${messageId}`)
-        .setLabel(`Перевыбрать победителя`)
-        .setStyle(ButtonStyle.Secondary)
-    
     // Найти последнее сообщение с результатами и обновить его
     const messages = await channel.messages.fetch({ after: messageId, limit: 10 })
     const resultMessage = messages.find(msg => 
         msg.author.id === client.user.id && 
-        msg.content.includes('Победител') &&
-        msg.components.length > 0
+        msg.content.includes('Победител')
     )
     
     if (resultMessage) {
         await resultMessage.edit({ 
             content: `Победител${giveaway.winners > 1 ? 'и' : 'ь'} ${winnersText}`, 
-            components: [new ActionRowBuilder().addComponents(rerollButton)] 
+            components: [] 
         })
     } else {
         // Если сообщение с результатами не найдено, создать новое
         await message.reply({ 
-            content: `Победител${giveaway.winners > 1 ? 'и' : 'ь'} ${winnersText}`, 
-            components: [new ActionRowBuilder().addComponents(rerollButton)] 
+            content: `Победител${giveaway.winners > 1 ? 'и' : 'ь'} ${winnersText}`
         })
     }
     

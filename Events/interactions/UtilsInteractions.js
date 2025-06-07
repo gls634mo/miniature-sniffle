@@ -57,7 +57,7 @@ export async function execute(interaction, client) {
         
         if(interaction.customId.includes('giveaway.reroll')) {
             if(!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-                return interaction.reply({ content: 'Только **администраторы** могут перевыберать победителей.', ephemeral: true })
+                return interaction.reply({ content: 'Только **администраторы** могут перевыберать победителей. Используйте команду `/reroll` вместо кнопки.', ephemeral: true })
             }
             
             interaction.deferUpdate({})
@@ -71,13 +71,19 @@ export async function execute(interaction, client) {
             if(!doc) return interaction.followUp({ content: 'Конкурс не найден.', ephemeral: true })
             
             function winners() {
-                let randomWinners = ``
-                for (let i = 0; i < Math.min(doc.members.length, doc.winners); i++) {
-                    const winnerIndex = Math.floor(Math.random() * doc.members.length)
-                    const member = interaction.guild.members.cache.get(doc.members[winnerIndex])
-                    if (member && !randomWinners.includes(member)) randomWinners += `${member} (\`${member.user.tag}\`), `
+                const availableMembers = [...doc.members]
+                const selectedWinners = []
+                const winnersCount = Math.min(availableMembers.length, doc.winners)
+                
+                for (let i = 0; i < winnersCount; i++) {
+                    const winnerIndex = Math.floor(Math.random() * availableMembers.length)
+                    const memberId = availableMembers.splice(winnerIndex, 1)[0]
+                    const member = interaction.guild.members.cache.get(memberId)
+                    if (member) {
+                        selectedWinners.push(`${member} (\`${member.user.tag}\`)`)
+                    }
                 }
-                return randomWinners.slice(0, -2)
+                return selectedWinners.join(', ')
             }
             
             const win = winners()
@@ -85,8 +91,7 @@ export async function execute(interaction, client) {
             const newembed = EmbedBuilder.from(embed).setDescription(`> Победител${doc.winners > 1 ? 'и' : 'ь'} ${win}`)
             await message.edit({ embeds: [newembed], components: [] })
             
-            const reroll = new ButtonBuilder().setCustomId(`giveaway.reroll.${doc.messageId}`).setLabel(`Перевыбрать победителя`).setStyle(ButtonStyle.Secondary)
-            await message.reply({ content: `Победител${doc.winners > 1 ? 'и' : 'ь'} ${win}`, components: [new ActionRowBuilder().addComponents(reroll)] })
+            await interaction.followUp({ content: `Победител${doc.winners > 1 ? 'и' : 'ь'} ${win}. Для дальнейших перевыборов используйте команду \`/reroll\`.`, ephemeral: true })
         }
     }
 }

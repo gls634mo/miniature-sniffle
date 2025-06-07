@@ -56,6 +56,9 @@ for (const folder of eventFolders) {
 
 // Регистрация команд после входа
 client.once('ready', async () => {
+    // Установка статуса DND
+    client.user.setStatus('dnd');
+    
     const rest = new REST().setToken(config.main.token);
 
     try {
